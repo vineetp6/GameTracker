@@ -1,3 +1,5 @@
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 package com.hackathon.gametracker
 
 import android.os.Bundle
@@ -109,5 +111,22 @@ fun GameList(modifier: Modifier = Modifier) {
  // remember (The Sticky Note 📝): 
   // Because the artist wipes the entire board during a redraw, any normal variables inside your code get completely erased and reset to their default starting values. 
   // remember acts like a permanent sticky note. It tells the artist: "When you wipe the board to redraw, do not erase this specific piece of data. Keep it exactly as it was."
+  // f we didn't use remember, Jetpack Compose would completely recreate an empty list from scratch every single time the screen refreshed! 
+     // Any games you added would vanish instantly. remember tells Compose to safely store that data across screen updates.
 
-  
+
+
+
+// mutableStateListOf forces the screen to update, and remember ensures your list of games actually survives that update instead of being wiped out.
+
+
+
+// @Composable annotation tells the Kotlin compiler that a specific function is responsible for building a piece of the user interface (UI).
+  // Normally, a Kotlin function takes in data and returns standard data (like numbers or text). 
+  // But when you add @Composable above a function, you change its job. 
+  //Instead of returning data, it "emits" visual elements onto the screen.
+// Think of a @Composable function like a custom UI building block. 
+  // When you wrote @Composable fun GameCard(game: Game), you created a custom block that takes in game data and draws a card.
+  // A strict rule in Jetpack Compose is that you can only call a @Composable function from inside another @Composable function.
+
+

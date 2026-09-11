@@ -57,3 +57,6 @@ fun GameCard(game: Game) {
     // Examples from the code:
        // Modifier.fillMaxWidth() stretches the component across the full screen width.
        // Modifier.padding(16.dp) adds breathing room around the edges.
+
+
+       
