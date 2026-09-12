@@ -121,3 +121,11 @@ fun AddGameDialog(
 // braces {} = The Instructions 📝: A list of tasks to run later (what UI to draw inside, or what action to perform when clicked/typed).
 
 
+// onValueChange = { title = it } => Jetpack Compose is strictly driven by state. 
+// The text box doesn't manage its own text; it only displays whatever the title variable currently holds. If we don't actively update title = it with every keystroke, the text box will just stay blank no matter what you type!
+
+// package com.hackathon.gametracker:
+   // In Kotlin, a package acts like a shared room. 
+   // Because both files declare they belong to the exact same package, the Kotlin compiler automatically links them together behind the scenes. 
+   // Any function (like our AddGameDialog) or data class (like our Game) created in one file is instantly visible to every other file in that same room.
+

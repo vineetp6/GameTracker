@@ -1,5 +1,3 @@
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
 package com.hackathon.gametracker
 
 import android.os.Bundle
@@ -16,8 +14,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 
 class MainActivity : ComponentActivity() {
@@ -35,7 +36,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun GameList(modifier: Modifier = Modifier) {
-    // 🧠 1. Convert to a "State" list that remembers its data
+    // 🧠 1. The State list (remembers our games while the app is open)
     val games = remember {
         mutableStateListOf(
             Game(title = "Elden Ring", platform = "PC", status = GameStatus.PLAYING, rating = 10),
@@ -43,13 +44,15 @@ fun GameList(modifier: Modifier = Modifier) {
         )
     }
 
-    // 🏗️ 2. Scaffold allows us to easily add a Floating Action Button (FAB)
+    // 🧠 2. State to control whether the pop-up dialog is visible
+    var showDialog by remember { mutableStateOf(false) }
+
+    // 🏗️ 3. Scaffold provides the layout structure for the Floating Action Button
     Scaffold(
         modifier = modifier,
         floatingActionButton = {
-            FloatingActionButton(onClick = {
-                // ➕ 3. Add a placeholder game when the button is clicked!
-                games.add(Game(title = "New Game", platform = "TBD"))
+            FloatingActionButton(onClick = { 
+                showDialog = true // Show the dialog when clicked
             }) {
                 Icon(Icons.Filled.Add, contentDescription = "Add Game")
             }
@@ -61,8 +64,21 @@ fun GameList(modifier: Modifier = Modifier) {
             }
         }
     }
-}
 
+    // 💬 4. Render the dialog conditionally based on state
+    if (showDialog) {
+        AddGameDialog(
+            onDismiss = { 
+                showDialog = false // Hide if canceled
+            },
+            onGameAdded = { newTitle, newPlatform ->
+                // Add the new game to the top of our state list
+                games.add(0, Game(title = newTitle, platform = newPlatform))
+                showDialog = false // Hide after adding
+            }
+        )
+    }
+}
 
 
 
@@ -128,5 +144,44 @@ fun GameList(modifier: Modifier = Modifier) {
 // Think of a @Composable function like a custom UI building block. 
   // When you wrote @Composable fun GameCard(game: Game), you created a custom block that takes in game data and draws a card.
   // A strict rule in Jetpack Compose is that you can only call a @Composable function from inside another @Composable function.
+
+
+// package com.hackathon.gametracker:
+   // In Kotlin, a package acts like a shared room. 
+   // Because both files declare they belong to the exact same package, the Kotlin compiler automatically links them together behind the scenes. 
+   // Any function (like our AddGameDialog) or data class (like our Game) created in one file is instantly visible to every other file in that same room.
+
+
+
+// var showDialog by remember { mutableStateOf(false) } :
+  // mutableStateOf(false): 
+    // This creates a special "wired" box holding the value false.
+    //  Because it is "State", Jetpack Compose constantly watches this box.
+    // If the value inside changes to true, Compose says, "Ah! Something changed! I need to immediately redraw the screen to reflect this."
+    // remember { ... }: 
+       // When Compose redraws the screen, it basically runs your code from top to bottom again.
+       // If you didn't have remember, the app would redraw the screen and instantly reset your box back to false. 
+       // remember tells the app: "Keep this box in a safe place so you don't overwrite it when you refresh the screen."
+    // by: This is just a handy Kotlin shortcut. 
+       // Instead of forcing you to write showDialog.value = true every single time, by lets you interact with the box directly by simply writing showDialog = true.
+
+
+// Lambda Expressions: 
+  // A lambda expression is a small block of code that can be passed around and executed later. 
+  // In Kotlin, we write them using curly braces {}. 
+  // For example, onClick = { showDialog = true } is a lambda expression that says, "When the button is clicked, run this code to set showDialog to true."
+
+
+
+// onGameAdded = { newTitle, newPlatform ->
+                //games.add(0, Game(title = newTitle, platform = newPlatform))
+                //showDialog = false // Hide after adding
+            //}
+   // Putting code inside curly braces {} with an arrow ->—is called a lambda expression.
+   // newTitle, newPlatform are the packages being handed back to the Main Screen by the Dialog. 
+      // The dialog is saying, "Here are the two specific text strings the user just finished typing."
+   // -> (The Arrow) is the bridge. 
+     // It separates what you receive from what you do.
+     // It basically translates to: "Take these items AND THEN do the following with them..."
 
 
