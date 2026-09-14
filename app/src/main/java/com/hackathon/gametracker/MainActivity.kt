@@ -185,3 +185,13 @@ fun GameList(modifier: Modifier = Modifier) {
      // It basically translates to: "Take these items AND THEN do the following with them..."
 
 
+// items(items = games, key = { game -> game.id }) { game -> GameCard(game = game):
+  // key = { game -> game.id }	"Take this game AND THEN hand back its id (so Compose can keep track of it)."
+  // { game -> GameCard(game = game) }	"Take this game AND THEN draw a GameCard using its data."
+
+
+//Important concept:
+  // To get your saved data back onto the screen tomorrow, the app has to work in reverse. 
+  // First, it reads the JSON text string from the phone's storage.
+  // Second, it uses Gson to translate that text back into a Kotlin List<Game>. 
+  // Finally, it puts that list into our Compose state so the screen redraws the cards.

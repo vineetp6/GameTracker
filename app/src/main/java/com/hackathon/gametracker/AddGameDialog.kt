@@ -129,3 +129,10 @@ fun AddGameDialog(
    // Because both files declare they belong to the exact same package, the Kotlin compiler automatically links them together behind the scenes. 
    // Any function (like our AddGameDialog) or data class (like our Game) created in one file is instantly visible to every other file in that same room.
 
+
+
+//Important concept:
+  // To get your saved data back onto the screen tomorrow, the app has to work in reverse. 
+  // First, it reads the JSON text string from the phone's storage.
+  // Second, it uses Gson to translate that text back into a Kotlin List<Game>. 
+  // Finally, it puts that list into our Compose state so the screen redraws the cards.

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<incidents format="6" by="lint 8.2.0" type="incidents">
+
+    <incident
+        id="OldTargetApi"
+        severity="warning"
+        message="Not targeting the latest versions of Android; compatibility modes apply. Consider testing and updating this version. Consult the android.os.Build.VERSION_CODES javadoc for details.">
+        <fix-replace
+            description="Update targetSdkVersion to 36"
+            oldString="34"
+            replacement="36"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="13"
+            column="9"
+            startOffset="261"
+            endLine="13"
+            endColumn="23"
+            endOffset="275"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.core:core-ktx than 1.12.0 is available: 1.19.0">
+        <fix-replace
+            description="Change to 1.19.0"
+            family="Update versions"
+            oldString="1.12.0"
+            replacement="1.19.0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="37"
+            column="21"
+            startOffset="689"
+            endLine="37"
+            endColumn="50"
+            endOffset="718"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.lifecycle:lifecycle-runtime-ktx than 2.7.0 is available: 2.11.0">
+        <fix-replace
+            description="Change to 2.11.0"
+            family="Update versions"
+            oldString="2.7.0"
+            replacement="2.11.0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="38"
+            column="21"
+            startOffset="741"
+            endLine="38"
+            endColumn="67"
+            endOffset="787"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.activity:activity-compose than 1.8.2 is available: 1.13.0">
+        <fix-replace
+            description="Change to 1.13.0"
+            family="Update versions"
+            oldString="1.8.2"
+            replacement="1.13.0"/>
+        <location
+            file="${:app*projectDir}/build.gradle.kts"
+            line="39"
+            column="21"
+            startOffset="810"
+            endLine="39"
+            endColumn="61"
+            endOffset="850"/>
+    </incident>
+
+</incidents>
