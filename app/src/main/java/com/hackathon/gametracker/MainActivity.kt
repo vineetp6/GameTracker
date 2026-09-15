@@ -20,6 +20,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext // Needed for storage!
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,24 +37,22 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun GameList(modifier: Modifier = Modifier) {
-    // 🧠 1. The State list (remembers our games while the app is open)
+    // 📱 Grab the Android context for storage
+    val context = LocalContext.current
+
+    // 📥 Load saved games immediately when the screen opens
     val games = remember {
-        mutableStateListOf(
-            Game(title = "Elden Ring", platform = "PC", status = GameStatus.PLAYING, rating = 10),
-            Game(title = "Hollow Knight", platform = "Switch", status = GameStatus.COMPLETED, rating = 9)
-        )
+        val savedGames = StorageManager.loadGames(context)
+        mutableStateListOf(*savedGames.toTypedArray()) 
     }
 
-    // 🧠 2. State to control whether the pop-up dialog is visible
+    // 🧠 State to control dialog visibility
     var showDialog by remember { mutableStateOf(false) }
 
-    // 🏗️ 3. Scaffold provides the layout structure for the Floating Action Button
     Scaffold(
         modifier = modifier,
         floatingActionButton = {
-            FloatingActionButton(onClick = { 
-                showDialog = true // Show the dialog when clicked
-            }) {
+            FloatingActionButton(onClick = { showDialog = true }) {
                 Icon(Icons.Filled.Add, contentDescription = "Add Game")
             }
         }
@@ -65,23 +64,20 @@ fun GameList(modifier: Modifier = Modifier) {
         }
     }
 
-    // 💬 4. Render the dialog conditionally based on state
     if (showDialog) {
         AddGameDialog(
-            onDismiss = { 
-                showDialog = false // Hide if canceled
-            },
+            onDismiss = { showDialog = false },
             onGameAdded = { newTitle, newPlatform ->
-                // Add the new game to the top of our state list
-                games.add(0, Game(title = newTitle, platform = newPlatform))
-                showDialog = false // Hide after adding
+                games.add(Game(title = newTitle, platform = newPlatform))
+                
+                // 💾 Save the new list to the phone right after adding
+                StorageManager.saveGames(context, games)
+                
+                showDialog = false
             }
         )
     }
 }
-
-
-
 
 
 
@@ -195,3 +191,28 @@ fun GameList(modifier: Modifier = Modifier) {
   // First, it reads the JSON text string from the phone's storage.
   // Second, it uses Gson to translate that text back into a Kotlin List<Game>. 
   // Finally, it puts that list into our Compose state so the screen redraws the cards.
+
+
+// Best time to load the games is the exact moment our games state variable is created! 
+// And we should save the games right after we add a new one to the list.
+
+// context: Context is like your app's ID badge. 
+  // The StorageManager needs to swipe this ID badge to get permission to open the phone's storage. 
+  // To read and write files in Android, we need access to the phone's environment, which Android calls a Context.
+    //  In Jetpack Compose, we grab this using LocalContext.current.
+
+
+// mutableStateListOf works. This function expects you to hand it individual items separated by commas, like this:
+   // mutableStateListOf(game1, game2, game3)
+   // It does not accept a pre-packaged List object. 
+   // If you try to hand it a whole list at once, Kotlin gets confused.
+
+// mutableStateListOf(*savedGames.toTypedArray())
+   // savedGames: This is your standard list of games loaded from the phone's memory.
+   // .toTypedArray(): This converts your flexible Kotlin List into a rigid Array. 
+   // We have to do this because the next step only works on Arrays.
+   // * (The Spread Operator): This is the magic symbol. 
+    // * It tells Kotlin to "unpack" or "spread out" the array into individual pieces.
+ // Imagine mutableStateListOf is a vending machine 🎰 that only accepts individual coins. savedGames is a tightly wrapped paper roll of coins.
+   // You can't shove the whole paper roll into the coin slot; it won't fit.
+   //  * (spread operator) is the action of breaking open the paper roll and pouring the individual coins into the slot one by one.
