@@ -9,18 +9,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext // Needed for storage!
+import androidx.compose.ui.platform.LocalContext
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,10 +35,10 @@ fun GameList(modifier: Modifier = Modifier) {
     // 📥 Load saved games immediately when the screen opens
     val games = remember {
         val savedGames = StorageManager.loadGames(context)
-        mutableStateListOf(*savedGames.toTypedArray()) 
+        mutableStateListOf(*savedGames.toTypedArray())
     }
 
-    // 🧠 State to control dialog visibility
+    // 🧠 State to control the Add Game dialog
     var showDialog by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -59,26 +51,37 @@ fun GameList(modifier: Modifier = Modifier) {
     ) { innerPadding ->
         LazyColumn(modifier = Modifier.padding(innerPadding)) {
             items(items = games, key = { game -> game.id }) { game ->
-                GameCard(game = game)
+                GameCard(
+                    game = game,
+                    onDelete = {
+                        games.remove(game)
+                        StorageManager.saveGames(context, games)
+                    },
+                    onStatusChange = { newStatus ->
+                        val index = games.indexOf(game)
+                        if (index != -1) {
+                            // Replace old game with updated copy
+                            games[index] = game.copy(status = newStatus)
+                            StorageManager.saveGames(context, games)
+                        }
+                    }
+                )
             }
         }
     }
 
+    // 💬 Render the dialog if showDialog is true
     if (showDialog) {
         AddGameDialog(
             onDismiss = { showDialog = false },
             onGameAdded = { newTitle, newPlatform ->
                 games.add(Game(title = newTitle, platform = newPlatform))
-                
-                // 💾 Save the new list to the phone right after adding
                 StorageManager.saveGames(context, games)
-                
                 showDialog = false
             }
         )
     }
 }
-
 
 
 
@@ -216,3 +219,55 @@ fun GameList(modifier: Modifier = Modifier) {
  // Imagine mutableStateListOf is a vending machine 🎰 that only accepts individual coins. savedGames is a tightly wrapped paper roll of coins.
    // You can't shove the whole paper roll into the coin slot; it won't fit.
    //  * (spread operator) is the action of breaking open the paper roll and pouring the individual coins into the slot one by one.
+
+
+// State Hoisting.
+  // State hoisting is a fancy way of saying: 
+    // "The child component (the GameCard) shouldn't delete the data itself. 
+    // It should just tell the parent component (the GameList) that the delete button was clicked, and let the parent handle the actual deletion."
+
+
+// onDelete is defined inside GameCard, but the actual deletion logic is handled in GameList. 
+  // This separation of concerns makes your code cleaner and easier to maintain.
+
+
+
+
+
+
+
+// LazyColumn(modifier = Modifier.padding(innerPadding)) {
+//             items(items = games, key = { game -> game.id }) { game ->
+//                 GameCard(
+//                     game = game,
+//                     onDelete = {
+//                         // 🗑️ Remove the game and save immediately
+//                         games.remove(game)
+//                         StorageManager.saveGames(context, games)
+   // onDelete is defined inside LazyColumn, which is inside GameList. 
+        // This means that when the delete button is clicked, the onDelete lambda has access to the games list and can remove the correct game from it.
+       // This is because of one of the most important rules in Jetpack Compose, called State Hoisting (moving the control of data "up" to the parent).
+       // GameCard is blind to the list: 
+           // The GameCard is only handed a single Game. 
+             //It has no idea that a games list or a LazyColumn even exists. 
+             // If we tried to put the delete code inside GameCard, it wouldn't know where to delete the game from!
+       // GameList owns the data: 
+            // The GameList (where our LazyColumn lives) is the "boss." 
+            // It holds the games list and the context needed to save to the phone's storage.
+       // Because GameCard has the trash can button but GameList has the data,they have to communicate. 
+            // The onDelete function is essentially a walkie-talkie.
+       // When user taps the trash can in the GameCard, it uses the walkie-talkie to say: 
+         // "Hey boss, my delete button was clicked!" 
+         // The boss (GameList) hears this inside the LazyColumn and handles the actual work of removing the item from the list and saving the file.
+
+
+
+
+
+
+
+// games.remove(game)
+// StorageManager.saveGames(context, games)
+   // we call StorageManager.saveGames(context, games) immediately after games.remove(game)
+  // This ensures that the app's data is always up-to-date. 
+  // If the user closes the app or the phone shuts down, the most recent changes are already saved to storage.

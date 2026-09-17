@@ -4,21 +4,20 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-// 🧠 1. We added 'onDelete', a function passed down from the parent
-fun GameCard(game: Game, onDelete: () -> Unit) {
+// 🧠 1. Added onStatusChange parameter
+fun GameCard(game: Game, onDelete: () -> Unit, onStatusChange: (GameStatus) -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        // We use a Row here to put the text on the left, and the button on the right
         Row(
             modifier = Modifier.padding(16.dp).fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -32,25 +31,47 @@ fun GameCard(game: Game, onDelete: () -> Unit) {
                 Spacer(modifier = Modifier.height(4.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = game.platform,
                         style = MaterialTheme.typography.bodyMedium
                     )
-                    Text(
-                        text = game.status.displayName,
-                        style = MaterialTheme.typography.labelLarge
-                    )
+                    
+                    // 🔽 2. A Box to hold the button and the dropdown menu together
+                    Box {
+                        var expanded by remember { mutableStateOf(false) }
+                        
+                        // Clickable text to open the menu
+                        TextButton(onClick = { expanded = true }) {
+                            Text(text = game.status.displayName)
+                        }
+                        
+                        DropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false }
+                        ) {
+                            // Loop through all possible statuses (Backlog, Playing, Completed)
+                            GameStatus.entries.forEach { status ->
+                                DropdownMenuItem(
+                                    text = { Text(status.displayName) },
+                                    onClick = {
+                                        onStatusChange(status) // Tell the parent!
+                                        expanded = false // Close the menu
+                                    }
+                                )
+                            }
+                        }
+                    }
                 }
             }
             
-            // 🗑️ 2. The Delete Button
             IconButton(onClick = onDelete) {
                 Icon(
                     imageVector = Icons.Filled.Delete,
                     contentDescription = "Delete Game",
-                    tint = MaterialTheme.colorScheme.error // Makes the icon red!
+                    tint = MaterialTheme.colorScheme.error
                 )
             }
         }
