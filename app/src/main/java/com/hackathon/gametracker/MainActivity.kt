@@ -271,3 +271,24 @@ fun GameList(modifier: Modifier = Modifier) {
    // we call StorageManager.saveGames(context, games) immediately after games.remove(game)
   // This ensures that the app's data is always up-to-date. 
   // If the user closes the app or the phone shuts down, the most recent changes are already saved to storage.
+
+
+
+
+
+
+MainActivity.kt & GameCard.kt are tightly connected. 
+  // MainActivity.kt is the "boss" that manages the list of games and handles saving to storage. 
+  // GameCard.kt is a "worker" that displays individual game information and communicates user actions (like delete or status change) back to the boss.
+
+   // MainActivity is the Boss. 
+      // It holds your master list of games and manages saving them to the phone. 
+   // The GameCard is just a Worker. 
+     // Its only job is to display the data the Boss hands to it.
+
+  // When you want to change a game from "Backlog" to "Completed", the Worker (GameCard) can't update the master list itself. 
+    // So, we gave the GameCard a "walkie-talkie" command called onStatusChange.
+  // Now, when you select a new status from the dropdown menu, the GameCard uses that walkie-talkie to radio the Boss: "Hey, update this game's status!" 
+     // The Boss then updates the master list and saves it to the phone.
+
+  
