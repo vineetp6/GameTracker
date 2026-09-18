@@ -3,6 +3,7 @@ package com.hackathon.gametracker
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -19,8 +20,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             MaterialTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    GameList(modifier = Modifier.padding(innerPadding))
+                Surface(modifier = Modifier.fillMaxSize()) {
+                    GameList()
                 }
             }
         }
@@ -29,17 +30,16 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun GameList(modifier: Modifier = Modifier) {
-    // 📱 Grab the Android context for storage
     val context = LocalContext.current
 
-    // 📥 Load saved games immediately when the screen opens
     val games = remember {
         val savedGames = StorageManager.loadGames(context)
         mutableStateListOf(*savedGames.toTypedArray())
     }
 
-    // 🧠 State to control the Add Game dialog
     var showDialog by remember { mutableStateOf(false) }
+    var selectedTabIndex by remember { mutableIntStateOf(0) }
+    val tabs = listOf("All 📋", "Backlog ⏳", "Playing 🎮", "Completed 🏆")
 
     Scaffold(
         modifier = modifier,
@@ -49,28 +49,45 @@ fun GameList(modifier: Modifier = Modifier) {
             }
         }
     ) { innerPadding ->
-        LazyColumn(modifier = Modifier.padding(innerPadding)) {
-            items(items = games, key = { game -> game.id }) { game ->
-                GameCard(
-                    game = game,
-                    onDelete = {
-                        games.remove(game)
-                        StorageManager.saveGames(context, games)
-                    },
-                    onStatusChange = { newStatus ->
-                        val index = games.indexOf(game)
-                        if (index != -1) {
-                            // Replace old game with updated copy
-                            games[index] = game.copy(status = newStatus)
+        Column(modifier = Modifier.padding(innerPadding)) {
+            TabRow(selectedTabIndex = selectedTabIndex) {
+                tabs.forEachIndexed { index, title ->
+                    Tab(
+                        selected = selectedTabIndex == index,
+                        onClick = { selectedTabIndex = index },
+                        text = { Text(title) }
+                    )
+                }
+            }
+
+            val filteredGames = when (selectedTabIndex) {
+                1 -> games.filter { it.status == GameStatus.BACKLOG }
+                2 -> games.filter { it.status == GameStatus.PLAYING }
+                3 -> games.filter { it.status == GameStatus.COMPLETED }
+                else -> games 
+            }
+
+            LazyColumn {
+                items(items = filteredGames, key = { game -> game.id }) { game ->
+                    GameCard(
+                        game = game,
+                        onDelete = {
+                            games.remove(game)
                             StorageManager.saveGames(context, games)
+                        },
+                        onStatusChange = { newStatus ->
+                            val index = games.indexOf(game)
+                            if (index != -1) {
+                                games[index] = game.copy(status = newStatus)
+                                StorageManager.saveGames(context, games)
+                            }
                         }
-                    }
-                )
+                    )
+                }
             }
         }
     }
 
-    // 💬 Render the dialog if showDialog is true
     if (showDialog) {
         AddGameDialog(
             onDismiss = { showDialog = false },
@@ -82,7 +99,6 @@ fun GameList(modifier: Modifier = Modifier) {
         )
     }
 }
-
 
 
 // In Jetpack Compose, we don't use a standard Column for dynamic lists. 
@@ -277,7 +293,7 @@ fun GameList(modifier: Modifier = Modifier) {
 
 
 
-MainActivity.kt & GameCard.kt are tightly connected. 
+// MainActivity.kt & GameCard.kt are tightly connected. 
   // MainActivity.kt is the "boss" that manages the list of games and handles saving to storage. 
   // GameCard.kt is a "worker" that displays individual game information and communicates user actions (like delete or status change) back to the boss.
 
@@ -292,3 +308,9 @@ MainActivity.kt & GameCard.kt are tightly connected.
      // The Boss then updates the master list and saves it to the phone.
 
   
+
+// game.copy(status = newStatus): going back to how the "Boss" (MainActivity) updates the master list. 
+      // When it receives the new status, we wrote this: game.copy(status = newStatus).
+  // This is a special feature of Kotlin data classes. 
+  // Instead of manually creating a new Game object and copying over all the old values, we can use the copy() function to create a new instance with just the updated status.
+  // This keeps our code clean and reduces the chance of errors when updating objects.

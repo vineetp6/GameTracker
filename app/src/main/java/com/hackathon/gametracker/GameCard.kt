@@ -120,3 +120,27 @@ fun GameCard(game: Game, onDelete: () -> Unit, onStatusChange: (GameStatus) -> U
      // The Boss then updates the master list and saves it to the phone.
 
     
+
+
+
+
+// Loop through all possible statuses (Backlog, Playing, Completed)
+// GameStatus.entries.forEach { status ->
+//     DropdownMenuItem(
+//         text = { Text(status.displayName) },
+//         onClick = {
+//             onStatusChange(status) // Tell the parent!
+//             expanded = false // Close the menu
+//         }
+//     )
+// }
+     // GameStatus.entries: 
+        // This grabs the complete list of options we created back in Stage 4 (Backlog, Playing, Completed).
+     // .forEach { ... }: 
+       // This is a loop. It tells the app, "Go through that list of options, one by one, and run the code inside these brackets for each one."
+     // status ->: This is just a temporary nickname (a variable) for the current item the loop is looking at.
+     // On the first loop, status equals "Backlog". It creates a button for Backlog.
+     //On the second loop, status equals "Playing". It creates a button for Playing.
+     // On the third loop, status equals "Completed".
+     // By doing it this way, if you ever add a 4th option like "Abandoned " to your GameStatus file later, this menu will automatically generate a button for it without you having to change this code.
+     
