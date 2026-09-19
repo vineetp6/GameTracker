@@ -5,15 +5,32 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,7 +48,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun GameList(modifier: Modifier = Modifier) {
     val context = LocalContext.current
-
     val games = remember {
         val savedGames = StorageManager.loadGames(context)
         mutableStateListOf(*savedGames.toTypedArray())
@@ -40,6 +56,9 @@ fun GameList(modifier: Modifier = Modifier) {
     var showDialog by remember { mutableStateOf(false) }
     var selectedTabIndex by remember { mutableIntStateOf(0) }
     val tabs = listOf("All 📋", "Backlog ⏳", "Playing 🎮", "Completed 🏆")
+    
+    // 🧠 State for our Search Bar
+    var searchQuery by remember { mutableStateOf("") }
 
     Scaffold(
         modifier = modifier,
@@ -59,12 +78,32 @@ fun GameList(modifier: Modifier = Modifier) {
                     )
                 }
             }
-
-            val filteredGames = when (selectedTabIndex) {
-                1 -> games.filter { it.status == GameStatus.BACKLOG }
-                2 -> games.filter { it.status == GameStatus.PLAYING }
-                3 -> games.filter { it.status == GameStatus.COMPLETED }
-                else -> games 
+            
+            // ⌨️ The Search Input Field
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                placeholder = { Text("Search games...") },
+                leadingIcon = { Icon(Icons.Filled.Search, contentDescription = "Search") },
+                singleLine = true
+            )
+            
+            // 🔍 The Dual-Filter Logic (Checks Tab AND Search Text)
+            val filteredGames = games.filter { game ->
+                val matchesTab = when (selectedTabIndex) {
+                    1 -> game.status == GameStatus.BACKLOG
+                    2 -> game.status == GameStatus.PLAYING
+                    3 -> game.status == GameStatus.COMPLETED
+                    else -> true // Tab 0 is "All"
+                }
+                
+                // Check if the title contains what the user typed
+                val matchesSearch = game.title.contains(searchQuery, ignoreCase = true)
+                
+                matchesTab && matchesSearch
             }
 
             LazyColumn {
