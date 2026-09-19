@@ -314,3 +314,44 @@ fun GameList(modifier: Modifier = Modifier) {
   // This is a special feature of Kotlin data classes. 
   // Instead of manually creating a new Game object and copying over all the old values, we can use the copy() function to create a new instance with just the updated status.
   // This keeps our code clean and reduces the chance of errors when updating objects.
+
+
+
+
+
+
+
+
+// Column(modifier = Modifier.padding(innerPadding)) {
+//             TabRow(selectedTabIndex = selectedTabIndex) {
+//                 tabs.forEachIndexed { index, title ->
+//                     Tab(
+//                         selected = selectedTabIndex == index,
+//                         onClick = { selectedTabIndex = index },
+//                         text = { Text(title) }
+//                     )
+//                 }
+//             }
+
+//             val filteredGames = when (selectedTabIndex) {
+//                 1 -> games.filter { it.status == GameStatus.BACKLOG }
+//                 2 -> games.filter { it.status == GameStatus.PLAYING }
+//                 3 -> games.filter { it.status == GameStatus.COMPLETED }
+//                 else -> games 
+//             }
+   // Column { ... }: This is the cabinet itself. 
+        // It simply stacks everything inside it vertically, from top to bottom (tabs on top, list on the bottom).
+   // TabRow { ... }: This is the row of navigation buttons (like tabs in a web browser) sitting at the top of the screen.
+   // tabs.forEachIndexed { ... }: Imagine an automated label maker. 
+        // It goes through our list of tab titles ("All", "Backlog", etc.) one by one. For each title, it creates a physical Tab button and assigns it a number (index): 0 for All, 1 for Backlog, 2 for Playing, and 3 for Completed.
+   // onClick = { selectedTabIndex = index }: 
+        // This is the action of your finger 👆 tapping a tab. 
+        // When you tap the "Playing" tab (which is index 2), it updates the app's memory to say, "The currently selected tab is now 2."
+   // val filteredGames = 
+     // when (...): This is your sorting assistant 🔍. 
+     // It looks at the currently selected tab number. 
+        // If the number is 1, it filters your master list and hands you only the games marked "Backlog". 
+        // If it's 2, it gives you the "Playing" games. If it's 0 (the else case), it just hands you the entire list.
+
+
+  
