@@ -356,9 +356,15 @@ fun GameList(modifier: Modifier = Modifier) {
 
 
 
-
-
-
+// val filteredGames = when (selectedTabIndex) {
+//                 1 -> games.filter { it.status == GameStatus.BACKLOG }
+//                 2 -> games.filter { it.status == GameStatus.PLAYING }
+//                 3 -> games.filter { it.status == GameStatus.COMPLETED }
+//                 else -> games // Tab 0 is "All"
+//             
+    // We didn't wrap filteredGames in remember { ... }, how does Jetpack Compose know when to recalculate that filtered list?
+    // Jetpack Compose is incredibly smart! Because selectedTabIndex and games are both defined as State (mutableIntStateOf and mutableStateListOf), Compose acts like an active listener. 
+       // The moment either of those variables changes, Compose automatically re-runs the code that reads them, instantly recalculating filteredGames without needing a remember block.
 
 
 // Column(modifier = Modifier.padding(innerPadding)) {
@@ -394,3 +400,46 @@ fun GameList(modifier: Modifier = Modifier) {
 
 
   
+
+
+// OutlinedTextField(
+//                 value = searchQuery,
+//                 onValueChange = { searchQuery = it },
+//                 modifier = Modifier
+//                     .fillMaxWidth()
+//                     .padding(horizontal = 16.dp, vertical = 8.dp),
+//                 placeholder = { Text("Search games...") },
+//                 leadingIcon = { Icon(Icons.Filled.Search, contentDescription = "Search") },
+//                 singleLine = true
+//             )
+   // OutlinedTextField is a text input box with a border around it. 
+      // It's where users can type in their search query.
+   // value = searchQuery: This tells the text box what to display. 
+      // It shows whatever is currently stored in the searchQuery variable.
+   // onValueChange = { searchQuery = it }: 
+      // This is the action that happens when the user types something. 
+      // Whatever the user types (represented by it) gets stored back into searchQuery, updating the app's memory.
+   // placeholder = { Text("Search games...") }: 
+      // This is the light gray text that appears inside the box when it's empty, guiding users on what to do.
+   // leadingIcon = { Icon(Icons.Filled.Search, contentDescription = "Search") }: 
+      // This adds a magnifying glass icon at the start of the text box, visually indicating that this is a search field.
+   // singleLine: This prevents the text box from growing vertically into a giant paragraph if the user hits the "Enter" key.
+
+
+
+
+
+
+
+
+// MainActivity.kt:
+   // In a professional app, MainActivity.kt is actually just an empty window. 
+     // Developers break the screen down into smaller, reusable "worker" files so multiple people can work on the app at the same time without their code colliding like files below would have been created if in production environment:
+        // GameSearchBar.kt (Handles only the text input)
+        // GameTabs.kt (Handles only the tabs)
+        // HomeScreen.kt (A "middle-manager" that arranges the search bar, tabs, and list on the screen)
+  // In production, the UI files don't even manage the filtering logic or the saving/loading. 
+     // Developers create a separate architecture file called a ViewModel. 
+     // The ViewModel holds the lists, does the filtering math, talks to the storage, and simply hands the final filteredGames list to the UI to display.
+
+
