@@ -46,15 +46,23 @@ fun GameList(modifier: Modifier = Modifier) {
     var searchQuery by remember { mutableStateOf("") }
     
     // 👑 State for Pro Status and Paywall Visibility
-    var isPro by remember { mutableStateOf(false) }
+    val prefs = context.getSharedPreferences("GameTrackerPrefs", android.content.Context.MODE_PRIVATE)
+    
+    // Check if they made the mock purchase previously
+    var isPro by remember { mutableStateOf(prefs.getBoolean("mock_pro", false)) }
     var showPaywall by remember { mutableStateOf(false) }
 
     // 📡 Check Pro status silently in the background when screen loads
     LaunchedEffect(Unit) {
         Purchases.sharedInstance.getCustomerInfoWith(
-            onError = { /* Silently ignore errors (e.g. no internet) for now */ },
+            onError = { /* Silently ignore errors */ },
             onSuccess = { customerInfo ->
-                isPro = customerInfo.entitlements["gametracker_pro"]?.isActive == true
+                // Only let RevenueCat update this if it's ACTUALLY true online.
+                // Otherwise, trust our local hackathon mock purchase!
+                val isRealPro = customerInfo.entitlements["gametracker_pro"]?.isActive == true
+                if (isRealPro) {
+                    isPro = true
+                }
             }
         )
     }
@@ -167,9 +175,13 @@ fun GameList(modifier: Modifier = Modifier) {
             confirmButton = {
                 Button(
                     onClick = {
-                        // 🔓 Simulate a successful purchase!
+                        // 🔓 Simulate a successful purchase and SAVE it permanently!
                         isPro = true
+                        prefs.edit().putBoolean("mock_pro", true).apply()
+                        
+                        // Close the paywall and immediately open the Add Game screen!
                         showPaywall = false
+                        showDialog = true 
                     }
                 ) { 
                     Text("Simulate Purchase ($4.99)") 
